@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>能量天賦測驗</title>
+    <style>
+        /* ===== 基本樣式 ===== */
+        body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; color: #333; }
+        .container { max-width: 600px; margin: auto; padding: 15px; }
+        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #eee; }
+        
+        /* 高亮主類型用 */
+        .card.highlight { border: 3px solid #ff4d6d; box-shadow: 0 0 10px rgba(255,77,109,0.5); }
+        
+        h2 { text-align: center; color: #ff4d6d; }
+        button { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px; background: #ff8fa3; color: white; font-size: 16px; cursor: pointer; }
+        button:hover { background: #ff4d6d; }
+
+        /* 分頁控制 */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* 結果區 RWD */
+        .result-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+        @media(min-width:768px){ .result-grid { grid-template-columns: 1fr 1fr; } }
+        
+        label { display: block; margin: 10px 0; cursor: pointer; padding: 5px; background: #fffafb; border-radius: 5px; }
+        input[type="radio"] { margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🌸 能量天賦測驗</h2>
+
+    <div id="pages"></div>
+
+    <div id="btnArea">
+        <button id="nextBtn" onclick="nextPage()">下一頁</button>
+        <button id="submitBtn" onclick="calculateResult()" style="display:none;">送出觀看結果</button>
+    </div>
+
+    <div id="resultDisplay"></div>
+</div>
+
+<script>
+const questions = [
+    { id: "D1", text: "D1.我把創意想法化為現實，會感到滿足與喜悅", type: "D" },
+    { id: "D2", text: "D2.我不喜歡做一成不變的事情", type: "D" },
+    { id: "D3", text: "D3.我喜歡思考新計畫、新想法", type: "D" },
+    { id: "D4", text: "D4.不善於耐心等待答案", type: "D" },
+    { id: "D5", text: "D5.朋友常會形容我「點子王」或「思考跳躍」", type: "D" },
+    { id: "B1", text: "B1.我認識結交新朋友，會感到滿足與喜悅", type: "B" },
+    { id: "B2", text: "B2.我不喜歡研究試算表裡的細部資訊", type: "B" },
+    { id: "B3", text: "B3.在新的環境裡，我喜歡主動跟人交談互動", type: "B" },
+    { id: "B4", text: "B4.我寧願問人，也不想閱讀說明很詳盡的操作手冊", type: "B" },
+    { id: "B5", text: "B5.朋友常會形容我「外向活潑」或「熱情」", type: "B" },
+    { id: "T1", text: "T1.我服務他人，會感到滿足與喜悅", type: "T" },
+    { id: "T2", text: "T2.我不喜歡混亂與不確定性", type: "T" },
+    { id: "T3", text: "T3.我買東西之前會貨比三家找到最划算才購買", type: "T" },
+    { id: "T4", text: "T4.要憑空想出新計畫總是讓我感到疲憊", type: "T" },
+    { id: "T5", text: "T5.朋友常會形容我「很可靠」或「很實在」", type: "T" },
+    { id: "S1", text: "S1.當我有自己獨處的時光，會感到滿足與喜悅", type: "S" },
+    { id: "S2", text: "S2.在新的環境裡我不喜歡主動跟人社交", type: "S" },
+    { id: "S3", text: "S3.我喜歡把細節整理得有條不紊", type: "S" },
+    { id: "S4", text: "S4.在一群陌生人面前表達自己想法，我會感到不自在", type: "S" },
+    { id: "S5", text: "S5.朋友常會形容我「做事仔細」或「善於分析」", type: "S" }
+];
+
+const analysis = {
+    D:{ title:"⚡ 發電機", data:{ 魅力:"很有想法、創造力強、充滿活力", 戀愛:"喜歡一起冒險、追求新鮮感", 互動:"喜歡有趣體驗、新鮮事", 聊天:"一起聊好玩的事情", 問句:"最近做過最有趣的事？明天放假想做什麼？" }},
+    B:{ title:"🔥 火焰型", data:{ 魅力:"熱情外向、帶動氣氛高手", 戀愛:"喜歡有互動、會聊天", 互動:"社交、分享情緒", 聊天:"多聊天多分享", 問句:"最近開心的事？你平常怎麼跟朋友聊天？" }},
+    T:{ title:"🌿 節奏型", data:{ 魅力:"貼心、穩定、很會照顧人", 戀愛:"慢慢來、重視安全感", 互動:"傾聽、陪伴、舒服", 聊天:"聊生活、日常", 問句:"你週末怎麼過？理想生活是什麼？" }},
+    S:{ title:"⚙️ 鋼鐵型", data:{ 魅力:"可靠、有責任感、有邏輯", 戀愛:"喜歡穩定關係", 互動:"理性分析、有目標", 聊天:"聊想法與規劃", 問句:"你對未來的目標是什麼？" }}
+};
+
+// 生成分頁
+const pagesDiv = document.getElementById("pages");
+let currentPage = 0;
+const pageSize = 10;
+
+for(let i=0; i<questions.length; i+=pageSize){
+    let page = document.createElement("div");
+    page.className="page";
+    questions.slice(i, i+pageSize).forEach(q=>{
+        page.innerHTML += `
+        <div class="card">
+            <p><b>${q.text}</b></p>
+            <label><input type="radio" name="${q.id}" value="1"> 是</label>
+            <label><input type="radio" name="${q.id}" value="0"> 否</label>
+        </div>`;
+    });
+    pagesDiv.appendChild(page);
+}
+document.querySelectorAll(".page")[0].classList.add("active");
+
+function nextPage(){
+    let pages = document.querySelectorAll(".page");
+    let currentQuestions = questions.slice(currentPage*pageSize, (currentPage+1)*pageSize);
+    
+    // 檢查必填
+    let allAnswered = currentQuestions.every(q => document.querySelector(`input[name="${q.id}"]:checked`));
+    if(!allAnswered){
+        Swal.fire({ icon: 'warning', title: '還沒填完喔', text: '請完成這一頁所有題目再繼續' });
+        return;
+    }
+
+    pages[currentPage].classList.remove("active");
+    currentPage++;
+
+    // 判斷是否為最後一頁
+    if(currentPage === pages.length - 1){
+        document.getElementById("nextBtn").style.display="none";
+        document.getElementById("submitBtn").style.display="block";
+    }
+    pages[currentPage].classList.add("active");
+}
+
+function calculateResult(){
+    // 檢查全題目必填
+    let allAnswered = questions.every(q => document.querySelector(`input[name="${q.id}"]:checked`));
+    if(!allAnswered){
+        Swal.fire({ icon: 'error', title: '還有題目沒填', text: '請全部作答後再送出' });
+        return;
+    }
+
+    let score = {D:0, B:0, T:0, S:0};
+    questions.forEach(q=>{
+        let ans = document.querySelector(`input[name="${q.id}"]:checked`);
+        if(ans) score[q.type] += parseInt(ans.value);
+    });
+
+    let max = Math.max(...Object.values(score));
+    let topTypes = Object.keys(score).filter(k => score[k] === max);
+
+    // 隱藏題目與按鈕
+    document.getElementById("pages").style.display = "none";
+    document.getElementById("btnArea").style.display = "none";
+
+    // 顯示分數
+    let html = `<div class="card"><h3>你的能量分數</h3>`;
+    html += `<p>⚡ 發電機：${score.D} | 🔥 火焰：${score.B} | 🌿 節奏：${score.T} | ⚙️ 鋼鐵：${score.S}</p>`;
+    
+    if(topTypes.length === 4){
+        html += `<h2 style="color:#ff4d6d">🌟 全才型（四種能量平衡）</h2>`;
+    } else {
+        html += `<h2 style="color:#ff4d6d">主類型：${topTypes.map(t=>analysis[t].title).join(" + ")}</h2>`;
+    }
+    html += `</div><div class="result-grid">`;
+
+    // 顯示詳細分析
+    Object.keys(analysis).forEach(type=>{
+        let d = analysis[type].data;
+        let isTop = topTypes.includes(type); // 判斷是否為主類型
+        
+        html += `
+        <div class="card ${isTop ? 'highlight' : ''}">
+            <h4 style="margin-top:0">${analysis[type].title} ${isTop ? ' (你的主場!)' : ''}</h4>
+            <p><b>你的魅力：</b>${d.魅力}</p>
+            <p><b>戀愛模式：</b>${d.戀愛}</p>
+            <p><b>互動偏好：</b>${d.互動}</p>
+            <p><b>聊天方式：</b>${d.聊天}</p>
+            <p><b>適合問句：</b>${d.問句}</p>
+        </div>`;
+    });
+    html += `</div>`;
+    html += `<button onclick="location.reload()">再測一次</button>`;
+
+    document.getElementById("resultDisplay").innerHTML = html;
+}
+</script>
+</body>
+</html>
