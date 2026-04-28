@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>能量天賦測驗</title>
     <style>
         /* ===== 基本樣式 ===== */
         body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; color: #333; }
         .container { max-width: 600px; margin: auto; padding: 15px; }
-        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #eee; }
+        .card { background: white; padding: 0px 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #eee; }
         
         /* 高亮主類型用 */
         .card.highlight { border: 3px solid #ff4d6d; box-shadow: 0 0 10px rgba(255,77,109,0.5); }
         
-        h2 { text-align: center; color: #ff4d6d; }
+        h2 { text-align: center; color: #ff4d6d; margin: 10px 16px; }
         button { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px; background: #ff8fa3; color: white; font-size: 16px; cursor: pointer; }
         button:hover { background: #ff4d6d; }
 
@@ -28,6 +29,14 @@
         
         label { display: block; margin: 10px 0; cursor: pointer; padding: 5px; background: #fffafb; border-radius: 5px; }
         input[type="radio"] { margin-right: 10px; }
+
+        /* 作者資訊區樣式 */
+        .author-info { text-align: center; margin-top: 20px; padding: 20px; background: #ffffff; border-radius: 15px; border: 1px dashed #ff8fa3; }
+        .author-info img { width: 150px; /* QR Code 的大小 */ height: 150px; margin: 0; border: 5px solid white; border-radius: 10px; }
+        .author-info a { color: #e1306c; /* Instagram 招牌色 */ text-decoration: none; font-weight: bold; }
+        .author-info i { height: 18px; }
+        .author-info p { margin-top: 0; }
+        .source-credit { font-size: 12px; color: #999; text-align: center; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -144,9 +153,9 @@ function calculateResult(){
     html += `<p>⚡ 發電機：${score.D} | 🔥 火焰：${score.B} | 🌿 節奏：${score.T} | ⚙️ 鋼鐵：${score.S}</p>`;
     
     if(topTypes.length === 4){
-        html += `<h2 style="color:#ff4d6d">🌟 全才型（四種能量平衡）</h2>`;
+        html += `<h3 style="color:#ff4d6d">🌟 全才型（四種能量平衡）</h3>`;
     } else {
-        html += `<h2 style="color:#ff4d6d">主類型：${topTypes.map(t=>analysis[t].title).join(" + ")}</h2>`;
+        html += `<h3 style="color:#ff4d6d">主類型：${topTypes.map(t=>analysis[t].title).join(" + ")}</h3>`;
     }
     html += `</div><div class="result-grid">`;
 
@@ -157,7 +166,7 @@ function calculateResult(){
         
         html += `
         <div class="card ${isTop ? 'highlight' : ''}">
-            <h4 style="margin-top:0">${analysis[type].title} ${isTop ? ' (你的主場!)' : ''}</h4>
+            <h3>${analysis[type].title} ${isTop ? ' (你的主場!)' : ''}</h3>
             <p><b>你的魅力：</b>${d.魅力}</p>
             <p><b>戀愛模式：</b>${d.戀愛}</p>
             <p><b>互動偏好：</b>${d.互動}</p>
@@ -167,6 +176,21 @@ function calculateResult(){
     });
     html += `</div>`;
     html += `<button onclick="location.reload()">再測一次</button>`;
+    // ===== 新增：作者宣傳區 =====
+    html += `
+    <div class="author-info">
+        <p>✨ <b>測驗結束囉！這是我親手製作的</b> ✨</p>
+        <p>如果你覺得準或是有幫助，歡迎追蹤一下我的 IG 幫我增加粉絲，我會超感謝你哈哈哈哈</p>
+        
+        <img src="igcode.png" alt="IG QR Code"><br>
+        
+        <a href="https://instagram.com/ballfish_savemoney_food?igshid=ZmRlMzRkMDU=" target="_blank">
+            <span>點連結>></span><i class="fab fa-instagram"></i> @ballfish_savemoney_food
+        </a>
+    </div>
+    
+    <div class="source-credit">題目來源：uni-joys</div>
+    `;
 
     document.getElementById("resultDisplay").innerHTML = html;
 }
