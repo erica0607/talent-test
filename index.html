@@ -24,19 +24,53 @@
         .page.active { display: block; }
 
         /* 結果區 RWD */
-        .result-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+        .result-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 0px; }
         @media(min-width:768px){ .result-grid { grid-template-columns: 1fr 1fr; } }
         
         label { display: block; margin: 10px 0; cursor: pointer; padding: 5px; background: #fffafb; border-radius: 5px; }
         input[type="radio"] { margin-right: 10px; }
 
         /* 作者資訊區樣式 */
-        .author-info { text-align: center; margin-top: 20px; padding: 20px; background: #ffffff; border-radius: 15px; border: 1px dashed #ff8fa3; }
+        .author-info {text-align: center; margin-top: 20px; padding: 20px; background: #ffffff; border-radius: 15px; border: 1px dashed #ff8fa3; } 
+        .sm { margin-top: 0px; padding: 10px; }
         .author-info img { width: 150px; /* QR Code 的大小 */ height: 150px; margin: 0; border: 5px solid white; border-radius: 10px; }
         .author-info a { color: #e1306c; /* Instagram 招牌色 */ text-decoration: none; font-weight: bold; }
-        .author-info i { height: 18px; }
+        .author-info i { height: 20px; }
         .author-info p { margin-top: 0; }
         .source-credit { font-size: 12px; color: #999; text-align: center; margin-top: 15px; }
+
+        /* 懸浮按鈕主體 */
+        .floating-ig-btn { position: fixed; bottom: 30px; right: 20px;
+        color: white;  text-decoration: none; font-size: 14px; font-weight: bold; 
+        display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        gap: 0; z-index: 9999; transition: all 0.3s ease; 
+        /* 設定動畫總時長為 6 秒 (抖動約 1 秒 + 靜止 5 秒) */
+        animation: shakeVertical 6s infinite;
+            p{
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            padding: 4px 16px; border-radius: 16px; margin: 0;
+            }
+        }
+
+        .fish{ filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.2)); height: 70px;}
+
+        .floating-ig-btn:hover {
+        /* 懸浮時讓位移變大，製造「浮起來」的錯覺 */
+        transform: scale(1.1) translateY(-5px); /* 往上飄一點點 */
+        }
+
+        /* 上下抖動兩下的邏輯 */
+        @keyframes shakeVertical {
+            /* 0% 到 15% 是抖動時間 (大約 0.9 秒) */
+            0% { transform: translateY(0); }
+            3% { transform: translateY(-10px); } /* 第一下上 */
+            6% { transform: translateY(0); }
+            9% { transform: translateY(-10px); } /* 第二下上 */
+            12% { transform: translateY(0); }
+
+            /* 15% 到 100% 都是靜止狀態 (大約 5.1 秒) */
+            15%, 100% { transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -50,6 +84,11 @@
         <button id="nextBtn" onclick="nextPage()">下一頁</button>
         <button id="submitBtn" onclick="calculateResult()" style="display:none;">送出觀看結果</button>
     </div>
+
+    <a href="https://instagram.com/ballfish_savemoney_food?igshid=ZmRlMzRkMDU=" 
+    target="_blank" class="floating-ig-btn">
+    <p>追蹤一下吧</p><img src="fish.png" alt="ig" class="fish">
+    </a>
 
     <div id="resultDisplay"></div>
 </div>
@@ -159,6 +198,14 @@ function calculateResult(){
     }
     html += `</div><div class="result-grid">`;
 
+    // ===== 新增：小作者宣傳區 =====
+    // html += `
+    // <div class="author-info sm">
+    //     <a href="https://instagram.com/ballfish_savemoney_food?igshid=ZmRlMzRkMDU=" target="_blank">
+    //         簡單支持作者IG>> @ballfish_savemoney_food
+    //     </a>
+    // </div>`;
+
     // 顯示詳細分析
     Object.keys(analysis).forEach(type=>{
         let d = analysis[type].data;
@@ -179,7 +226,7 @@ function calculateResult(){
     // ===== 新增：作者宣傳區 =====
     html += `
     <div class="author-info">
-        <p>✨ <b>測驗結束囉！這是我親手製作的</b> ✨</p>
+        <p>✨ <b>測驗結束囉！這是我精心製作的</b> ✨</p>
         <p>如果你覺得準或是有幫助，歡迎追蹤一下我的 IG 幫我增加粉絲，我會超感謝你哈哈哈哈</p>
         
         <img src="igcode.png" alt="IG QR Code"><br>
