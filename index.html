@@ -71,6 +71,13 @@
             /* 15% 到 100% 都是靜止狀態 (大約 5.1 秒) */
             15%, 100% { transform: translateY(0); }
         }
+
+        /* ===== 版權 ===== */
+        .footer-copy {
+        font-size: clamp(0.7rem, 1.6vw, 0.8rem); color: #c9a0a8; margin-top: 4px; text-align: center;}
+
+        @media (min-width: 640px) {
+        .footer-copy {font-size: 0.875rem;}}
     </style>
 </head>
 <body>
@@ -91,6 +98,11 @@
     </a>
 
     <div id="resultDisplay"></div>
+    <p class="footer-copy">
+        © <span id="currentYear"></span> 能量天賦測驗 版權所有
+        <span class="footer__dot">•</span>
+        Design by 球球魚
+    </p>
 </div>
 
 <script>
@@ -240,7 +252,17 @@ function calculateResult(){
     `;
 
     document.getElementById("resultDisplay").innerHTML = html;
+
+    // (接續 calculateResult 函式結尾)
+    document.getElementById("resultDisplay").innerHTML = html;
+    }
+
+    // 網頁一載入，立刻抓取今年年份
+    const yearElement = document.getElementById("currentYear");
+    if(yearElement) {
+    yearElement.innerText = new Date().getFullYear();
 }
+</script>
 </script>
 </body>
 </html>
